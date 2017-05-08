@@ -10,6 +10,7 @@ import scrapy
 
 class ProfileItem(scrapy.Item):
     # define the fields for your item here like:
+    item_name = scrapy.Field()
     _id = scrapy.Field()
     username = scrapy.Field()
     userid = scrapy.Field()
@@ -24,6 +25,7 @@ class ProfileItem(scrapy.Item):
 
 
 class RequirementItem(scrapy.Item):
+    item_name = scrapy.Field()
     _id = scrapy.Field()
     userid = scrapy.Field()
     age = scrapy.Field()
@@ -32,16 +34,19 @@ class RequirementItem(scrapy.Item):
     degree = scrapy.Field()
     album = scrapy.Field()
     marriage_state = scrapy.Field()
+    live_in = scrapy.Field()
     integrity = scrapy.Field()
 
 
 class LifeStyleItem(scrapy.Item):
+    item_name = scrapy.Field()
     _id = scrapy.Field()
     smoke = scrapy.Field()
     userid = scrapy.Field()
     drink = scrapy.Field()
     exercise_habit = scrapy.Field()
     diet_habit = scrapy.Field()
+    shopping = scrapy.Field()
     religious_belief = scrapy.Field()
     schedule = scrapy.Field()
     social_circle = scrapy.Field()
@@ -49,6 +54,7 @@ class LifeStyleItem(scrapy.Item):
 
 
 class FinancialSituationItem(scrapy.Item):
+    item_name = scrapy.Field()
     _id = scrapy.Field()
     userid = scrapy.Field()
     wage = scrapy.Field()
@@ -60,9 +66,10 @@ class FinancialSituationItem(scrapy.Item):
 
 
 class WorkItem(scrapy.Item):
+    item_name = scrapy.Field()
     _id = scrapy.Field()
     userid = scrapy.Field()
-    position = scrapy.Field
+    position = scrapy.Field()
     company_category = scrapy.Field()
     company_type = scrapy.Field()
     welfare_treatment = scrapy.Field()
@@ -72,7 +79,8 @@ class WorkItem(scrapy.Item):
     work_abord_possibility = scrapy.Field()
 
 
-class EdutationItem(scrapy.Item):
+class EducationItem(scrapy.Item):
+    item_name = scrapy.Field()
     _id = scrapy.Field()
     userid = scrapy.Field()
     graduated_from = scrapy.Field()
@@ -81,6 +89,7 @@ class EdutationItem(scrapy.Item):
 
 
 class MarriageViewItem(scrapy.Item):
+    item_name = scrapy.Field()
     _id = scrapy.Field()
     userid = scrapy.Field()
     native_place = scrapy.Field()
@@ -91,6 +100,7 @@ class MarriageViewItem(scrapy.Item):
     temper = scrapy.Field()
     about_child = scrapy.Field()
     about_relationship = scrapy.Field()
+    marriage_time = scrapy.Field()
     about_love_in_different_place = scrapy.Field()
     ideal_marriage = scrapy.Field()
     live_with_spouse_family = scrapy.Field()
@@ -103,5 +113,7 @@ class MarriageViewItem(scrapy.Item):
 
 
 class ImageItem(scrapy.Item):
+    item_name = scrapy.Field()
+    userid = scrapy.Field()
     _id = scrapy.Field()
     image_urls = scrapy.Field()
