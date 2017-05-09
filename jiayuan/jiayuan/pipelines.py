@@ -3,8 +3,9 @@
 
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: http://doc.scrapy.org/en/latest/topics/item-pipeline.html
+import logging
+
 import pymongo
-from scrapy import log
 # Define your item pipelines here
 #
 from scrapy.conf import settings
@@ -32,7 +33,7 @@ class MongoDBPipeline(object):
             for collection in self.collections:
                 if collection == item['item_name']:
                     self.db[collection].insert(dict(item))
-                    log.msg("{} added to MongoDB".format(item['item_name']),
-                            level=log.DEBUG, spider=spider)
+                    logging.debug(
+                        "{} added to MongoDB".format(item['item_name']))
 
         return item

@@ -19,31 +19,42 @@ from jiayuan.items import (EducationItem, FinancialSituationItem, ImageItem,
 class JiaYuanSpider(scrapy.Spider):
     name = "jiayuan"
     start_urls = ['http://www.jiayuan.com/']
+    headers = "Mozilla/5.0 (Windows NT 5.1) Gecko/20100101 Firefox/14.0 Opera/12.0"
 
     def __init__(self):
-        self.gender_total_page = {'f': 60114, 'm': 84951}
+        self.genders = ["f", "m"]
+        self.gender_total_page = {}
         self.cookies = self.get_cookie()
         self.search_url = "http://search.jiayuan.com/v2/search_v2.php"
 
     def start_requests(self):
-        post_data = {"sex": "m", "key": "", "stc": "", "sn": "default",
-                     "sv": 1, "p": 1, "f": "select", "listStyle": "bigPhoto",
-                     "pri_uid": 163251260, "jsversion": "v5"}
-        yield Request(url=self.search_url, meta={'cookiejar': self.cookies},
-                      method="POST", body=parse.urlencode(post_data),
-                      callback=self.parse)
+        for gender in self.genders:
+            post_data = {"sex": gender, "key": "", "stc": "",
+                         "sn": "default", "sv": 2, "p": 1,
+                         "f": "select", "listStyle": "bigPhoto",
+                         "pri_uid": 163251260, "jsversion": "v5"}
+            yield Request(url=self.search_url,
+                          meta={'cookiejar': self.cookies},
+                          body=parse.urlencode(post_data),
+                          method="POST", callback=self.parse)
 
     def parse(self, response):
-        # check login succeed before going on
-        if r"/login/err.php?err_type=2&pre_url=" in response.css('script::text').extract():
-            self.logger.error("Login failed")
-            return
-        # We've successfully authenticated, let's have some fun!
-        else:
+        request_parameter = parse.parse_qs(str(response.request.body, "utf-8"))
+        self.logger.debug("request_parameter %s.", request_parameter)
+        response_fixed_json = self.fix_broken_json(response)
+        result = json.loads(response_fixed_json)
+        page_total = result.get('pageTotal')
+        for key, value in request_parameter.items():
+            if key == "sex":
+                gender = value[0]
+                self.gender_total_page[gender] = page_total
+                self.logger.debug("gender total page dict: %s.",
+                                  self.gender_total_page)
+        if len(self.gender_total_page) == 2:
             for gender, total_page in self.gender_total_page.items():
                 for page_numer in range(1, 5 + 1):
                     post_data = {"sex": gender, "key": "", "stc": "",
-                                 "sn": "default", "sv": 1, "p": page_numer,
+                                 "sn": "default", "sv": 2, "p": page_numer,
                                  "f": "select", "listStyle": "bigPhoto",
                                  "pri_uid": 163251260, "jsversion": "v5"}
                     logging.debug("post data: {}".format(post_data))
@@ -55,13 +66,12 @@ class JiaYuanSpider(scrapy.Spider):
 
         # continue scraping with authenticated session...
     def parse_search_result(self, response):
-        response_broken_json = str(response.body, 'utf-8')
-        response_broken_json.replace('##jiayser##', '')
-        response_fixed_json = response_broken_json.replace(
-            r'##jiayser##\\', '')
+        self.logger.debug("Rearch parameter: %s", response.request.body)
+        response_fixed_json = self.fix_broken_json(response)
         result = json.loads(response_fixed_json)
         user_info = result.get('userInfo')
         user_id = [info.get("realUid") for info in user_info]
+        self.logger.debug("User id: %s", user_id)
         user_id = list(map(str, user_id))
         user_profile_url = [urljoin('http://www.jiayuan.com', id)
                             for id in user_id]
@@ -88,7 +98,7 @@ class JiaYuanSpider(scrapy.Spider):
         marriage_view = self.parse_marriage_view(response)
         items.append(marriage_view)
         image_item = self.parse_image(response)
-        items.append(response)
+        items.append(image_item)
         yield items
 
     def parse_profile(self, response):
@@ -282,3 +292,10 @@ class JiaYuanSpider(scrapy.Spider):
         login_url = "http://www.jiayuan.com/login/dologin.php"
         opener.open(login_url, encoded_data)
         return cookie
+
+    def fix_broken_json(self, response):
+        response_broken_json = str(response.body, 'utf-8')
+        response_broken_json.replace('##jiayser##', '')
+        response_fixed_json = response_broken_json.replace(
+            r'##jiayser##\\', '')
+        return response_fixed_json
