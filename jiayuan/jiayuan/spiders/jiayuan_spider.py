@@ -30,7 +30,7 @@ class JiaYuanSpider(scrapy.Spider):
     def start_requests(self):
         for gender in self.genders:
             post_data = {"sex": gender, "key": "", "stc": "",
-                         "sn": "default", "sv": 2, "p": 1,
+                         "sn": "default", "sv": 4, "p": 1,
                          "f": "select", "listStyle": "bigPhoto",
                          "pri_uid": 163251260, "jsversion": "v5"}
             yield Request(url=self.search_url,
